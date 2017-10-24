@@ -10,6 +10,7 @@
 
 void*handler(void*num);
 int isPrime(int64_t n);
+//pthread_t threads;
 
 pthread_mutex_t count_mutex;
 
@@ -47,7 +48,7 @@ if( nThreads < 1 || nThreads > 256) {
 printf("Bad arguments. 1 <= nThreads <= 256!\n");
 }
 
-pthread_mutex_init( &count_mutex, NULL);
+pthread_mutex_init(&count_mutex, NULL);
 pthread_t threads[nThreads];
 
 
@@ -65,7 +66,7 @@ long indexer;
   for(indexer=1;indexer<=nThreads;indexer++){
     pthread_join(threads[(indexer-1)],NULL);}
     
-pthread_mutex_destroy( &count_mutex);
+pthread_mutex_destroy(&count_mutex);
 //printf("found %ld numbers\n", numbersfound);
 /// report results*/
 printf("Found %ld primes.\n", count);
@@ -76,8 +77,12 @@ return 0;
 void*handler(void*num){
 while( 1) {
 	int64_t num;
-	
-	if( 1 != scanf("%ld", & num)) break; 
+	pthread_mutex_lock(&count_mutex);	
+	if( 1 != scanf("%ld", & num)) {
+	pthread_mutex_unlock(&count_mutex); 
+	break;}
+	pthread_mutex_unlock(&count_mutex); 
+
 	if( isPrime(num)) count ++;
 }
 }
