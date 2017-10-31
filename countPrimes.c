@@ -12,6 +12,7 @@ void*handler(void*num);
 int isPrime(int64_t n);
 //pthread_t threads;
 
+//initialize a mutes (this is basically a number to compare to)
 pthread_mutex_t count_mutex;
 
 volatile int64_t count = 0;
@@ -48,13 +49,15 @@ if( nThreads < 1 || nThreads > 256) {
 printf("Bad arguments. 1 <= nThreads <= 256!\n");
 }
 
+	//initialize the mutex number
 pthread_mutex_init(&count_mutex, NULL);
+//create pointers to the threads
 pthread_t threads[nThreads];
 
 
 printf("Counting primes using %d thread%s.\n",
 nThreads, nThreads == 1 ? "" : "s");
-
+//this loop is taking each thread and instantiating it, create(thread pointer,NULL,method to go to,any variable to pass in)
 long indexer;
   for(indexer =1;indexer<=nThreads;indexer++){
 	  if( 0 != pthread_create(&threads[(indexer-1)],NULL,handler,(void*)indexer)){
@@ -62,10 +65,11 @@ long indexer;
       exit(-1);
     }}
 
-   //join all the threads
+   //join all the threads, this is so the process doesnt terminate before theyre all done
   for(indexer=1;indexer<=nThreads;indexer++){
     pthread_join(threads[(indexer-1)],NULL);}
     
+//this is to clean up after the mutex
 pthread_mutex_destroy(&count_mutex);
 //printf("found %ld numbers\n", numbersfound);
 /// report results*/
@@ -77,8 +81,10 @@ return 0;
 void*handler(void*num){
 while( 1) {
 	int64_t num;
+	//locks access to this section of code to a single thread
 	pthread_mutex_lock(&count_mutex);	
 	if( 1 != scanf("%ld", & num)) {
+		//unlocks access
 	pthread_mutex_unlock(&count_mutex); 
 	break;}
 	pthread_mutex_unlock(&count_mutex); 
